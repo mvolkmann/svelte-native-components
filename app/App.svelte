@@ -15,10 +15,10 @@
   const temperatures = ['Cold', 'Warm', 'Hot'];
 
   let authenticated = false;
+  let backgroundColor;
   let birthday = new Date(1961, 3, 16);
   let busy = false;
   let favoriteColorIndex = 0;
-  let favoriteColor = colors[favoriteColorIndex];
   let firstName = '';
   let progressPercent = 0;
   let likeRunning = false;
@@ -33,7 +33,8 @@
   quittingTime.setMinutes(0);
   quittingTime.setSeconds(0);
 
-  //$: favoriteColor = colors[favoriteColorIndex];
+  $: backgroundColor = authenticated ? 'lightgreen' : 'pink';
+  $: favoriteColor = colors[favoriteColorIndex];
 
   async function checkColor() {
     if (favoriteColor === 'yellow') {
@@ -90,8 +91,7 @@
   }
 
   function onFavoriteColor(event) {
-    const index = event.value; // weird that this is an index
-    favoriteColor = colors[index];
+    favoriteColorIndex = event.value; // weird that this is an index
   }
 
   function onSearchSubmit() {
@@ -112,8 +112,7 @@
   }
 
   function onTapColor(event) {
-    const color = colors[event.index];
-    console.log(`You tapped the color ${color}.`);
+    favoriteColorIndex = event.index;
   }
 
   function onTapDelete() {
@@ -127,7 +126,10 @@
   async function pickColor() {
     const NONE = 'No Thanks';
     const choice = await action('Pick a color', NONE, colors);
-    if (choice !== NONE) favoriteColor = choice;
+    //if (choice !== NONE) favoriteColor = choice;
+    if (choice !== NONE) {
+      favoriteColorIndex = colors.findIndex(c => c === choice);
+    }
   }
 
   async function promptForLogin() {
@@ -175,8 +177,9 @@
 </script>
 
 <page>
-  <!-- TODO: Still need to demo TabStrip, TabStripItem, TabContentItem,
-       BottomNavigation, and Tabs.
+  <!-- TODO: Still need to demo Tabs, TabStrip, TabStripItem, and TabContentItem.
+       BottomNavigation has the same children as Tabs.
+
        Modify this to display different categories of components
        on different pages.
   -->
@@ -192,178 +195,186 @@
       text="delete" android.position="popup" />
   </actionBar>
 
-  <scrollView backgroundColor={authenticated ? 'lightgreen' : 'pink'}>
-    <stackLayout class="p-20">
-      <wrapLayout>
-        {#if authenticated}
-          <button on:tap={() => authenticated = false}>Logout</button>
-        {:else}
-          <button on:tap={promptForLogin}>Login ...</button>
-        {/if}
-      </wrapLayout>
+  <tabs bind:selectedIndex={selectedTab}>
+    <tabStrip>
+      <tabStripItem>
+        <label text="Display" />
+        <image src="font://&#xf015;" class="fas t-36" />
+      </tabStripItem>
+      <tabStripItem>
+        <label text="Input" />
+        <image src="font://&#xf007;" class="fas t-36" />
+      </tabStripItem>
+      <tabStripItem>
+        <label text="Other" />
+        <image src="font://&#xf00e;" class="fas t-36" />
+      </tabStripItem>
+    </tabStrip>
 
-      <!-- Using gridLayout to position activityIndicator over searchBar. -->
-      <gridLayout rows="*">
-        <searchBar
-          hint="Enter part of a color name."
-          bind:text={query}
-          on:submit={onSearchSubmit}
-          row="0"
-        />
-        <!-- The activityIndication height and width attributes
-             control the allocated space.
-             But the size of the spinner cannot be changed,
-             only the color. -->
-        <activityIndicator busy={busy} row="0"/>
-      </gridLayout>
-
-      <image src="~/svelte-native-logos.png" stretch="fill" />
-
-      <segmentedBar selectedBackgroundColor="yellow">
-        <segmentedBarItem title="Cold" />
-        <segmentedBarItem title="Warm" />
-        <segmentedBarItem title="Hot" />
-      </segmentedBar>
-
-      <!-- The API docs show passing an array of items
-           using the "items" prop, but that does not work.
-           The children must be segmentedBarItem components. -->
-      <segmentedBar
-        bind:selectedIndex={temperatureIndex}
-        selectedBackgroundColor="yellow"
+    <!-- Display content -->
+    <tabContentItem>
+      <stackLayout
+        backgroundColor={backgroundColor}
+        class="p-20"
       >
-        {#each temperatures as temp}
-          <segmentedBarItem title={temp} />
-        {/each}
-      </segmentedBar>
+        <image src="~/svelte-native-logos.png" stretch="aspectFit" />
 
-      <label class="panagram" textWrap="true">
-        <formattedString>
-          <span class="fox">The quick brown fox</span>
-          <span text=" jumps over " />
-          <span class="dog">the lazy dog</span>
-          <span text="." />
-        </formattedString>
-      </label>
+        <label class="panagram" textWrap="true">
+          <formattedString>
+            <span class="fox">The quick brown fox</span>
+            <span text=" jumps over " />
+            <span class="dog">the lazy dog</span>
+            <span text="." />
+          </formattedString>
+        </label>
 
-      <!-- The NativeScript docs say
-           "The HtmlView component has limited styling capabilities.
-           For more complex scenarios use the WebView component." -->
-      <!--htmlView html={myHtml} /-->
+        <!-- The NativeScript docs say
+            "The HtmlView component has limited styling capabilities.
+            For more complex scenarios use the WebView component." -->
+        <!--htmlView html={myHtml} /-->
 
-      <!-- webView components may need to be given a height in CSS.
-           See https://github.com/halfnelson/svelte-native/issues/132. -->
-      <webView src={myHtml} />
+        <!-- webView components may need to be given a height in CSS.
+            See https://github.com/halfnelson/svelte-native/issues/132. -->
+        <webView src={myHtml} />
 
-      <!--TODO: It appears that you cannot pass a string of HTML
-          as the value of the src attribute. -->
-      <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
+        <!--TODO: It appears that you cannot pass a string of HTML
+            as the value of the src attribute. -->
+        <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
 
-      <!--TODO: Try to get this to work. -->
-      <!--webView src="~/demo.html" /-->
+        <!--TODO: Try to get this to work. -->
+        <!--webView src="~/demo.html" /-->
 
-      <button on:tap={startProgress}>Start Progress</button>
-      <progress class="progress" maxValue={100} value="{progressPercent}" />
+        <button on:tap={startProgress}>Start Progress</button>
+        <progress class="progress" maxValue={100} value="{progressPercent}" />
+      </stackLayout>
+    </tabContentItem>
 
-      <wrapLayout>
-        <label text="Birthday" />
-        <datePicker bind:date={birthday} />
-        <label class="plain" text="You selected {formatDate(birthday)}." />
-      </wrapLayout>
-      <wrapLayout>
-        <listView items={colors} on:itemTap={onTapColor}>
-          <Template let:item={color}>
-            <label class="list" text="One of the colors is {color}." />
-          </Template>
-        </listView>
-      </wrapLayout>
-      <wrapLayout>
-        <label text="Favorite Color" />
-        <!--TODO: See https://github.com/halfnelson/svelte-native/issues/129 -->
-        <!--listPicker items={colors} bind:selectedIndex={favoriteColorIndex} 
-          on:selectedIndexChange={onFavoriteColor} /-->
-        <listPicker items={colors} on:selectedIndexChange={onFavoriteColor} />
-        <label class="plain" text="You selected {favoriteColor}." />
-      </wrapLayout>
-      <button on:tap={pickColor}>Pick a Color</button>
-      <wrapLayout>
-        <label text="Stars" />
-        <!-- The slider position doesn't change when
-             JavaScript code changes the value of stars.
-             See https://github.com/halfnelson/svelte-native/issues/128. -->
-        <slider
-          minValue={1}
-          maxValue={5}
-          value={stars}
-          on:valueChange={starChange}
-        />
-        <label class="plain" text="You rated it {stars} stars" />
-      </wrapLayout>
-      <wrapLayout>
-        <label text="Like Running?" />
-        <switch bind:checked={likeRunning} />
-        <label
-          class="plain"
-          text="You{likeRunning ? '' : ' do not'} like running."
-        />
-      </wrapLayout>
-      <wrapLayout>
-        <label text="First Name" />
-        <textField class="first-name" bind:text={firstName} />
-        <label class="plain" text="Your first name is {firstName}." />
-      </wrapLayout>
-      <button on:tap={getFirstName}>Prompt for First Name</button>
-      <wrapLayout>
-        <label text="What would you say you do here?" />
-        <textView class="reason" bind:text={reason} />
-        <label class="plain" text="Your reason for being is {reason}." textWrap="true" />
-      </wrapLayout>
-      <wrapLayout>
-        <label text="Quitting Time" />
-        <timePicker bind:time={quittingTime} />
-        <label class="plain" text="You will quit at {formatTime(quittingTime)}." />
-      </wrapLayout>
+    <!-- Input content -->
+    <tabContentItem>
+      <scrollView>
+        <stackLayout
+          backgroundColor={backgroundColor}
+          class="p-20"
+        >
+          <wrapLayout>
+            <label text="First Name" />
+            <textField class="first-name" bind:text={firstName} />
+            <label class="plain" text="Your first name is {firstName}." />
+          </wrapLayout>
+          <button on:tap={getFirstName}>Prompt for First Name</button>
 
-      <!--tabs bind:selectedIndex={selectedTab}>
+          <wrapLayout>
+            <label text="What would you say you do here?" />
+            <textView class="reason" bind:text={reason} />
+            <label class="plain" text="Your reason for being is {reason}." textWrap="true" />
+          </wrapLayout>
 
-        !-- The bottom tab UI is created via TabStrip (the container)
-             and TabStripItem (for each tab). --
-        <tabStrip>
-          <tabStripItem>
-            <label text="Home" />
-            <image src="font://&#xf015;" class="fas t-36" />
-          </tabStripItem>
-          <tabStripItem class="special">
-            <label text="Account" />
-            <image src="font://&#xf007;" class="fas t-36" />
-          </tabStripItem>
-          <tabStripItem class="special">
-            <label text="Search" />
-            <image src="font://&#xf00e;" class="fas t-36" />
-          </tabStripItem>
-        </tabStrip>
+          <wrapLayout>
+            <label text="Like Running?" />
+            <switch bind:checked={likeRunning} />
+            <label
+              class="plain"
+              text="You{likeRunning ? '' : ' do not'} like running."
+            />
+          </wrapLayout>
 
-        !-- The number of TabContentItem components should
-             correspond to the number of TabStripItem components --
-        <tabContentItem>
-          <gridLayout>
-            <label text="Home Page" class="h2 text-center" />
+          <segmentedBar selectedBackgroundColor="yellow">
+            <segmentedBarItem title="Cold" />
+            <segmentedBarItem title="Warm" />
+            <segmentedBarItem title="Hot" />
+          </segmentedBar>
+
+          <!-- The API docs show passing an array of items
+              using the "items" prop, but that does not work.
+              The children must be segmentedBarItem components. -->
+          <segmentedBar
+            bind:selectedIndex={temperatureIndex}
+            selectedBackgroundColor="yellow"
+          >
+            {#each temperatures as temp}
+              <segmentedBarItem title={temp} />
+            {/each}
+          </segmentedBar>
+
+          <wrapLayout>
+            <label text="Birthday" />
+            <datePicker bind:date={birthday} />
+            <label class="plain" text="You selected {formatDate(birthday)}." />
+          </wrapLayout>
+
+          <wrapLayout>
+            <label text="Quitting Time" />
+            <timePicker bind:time={quittingTime} />
+            <label class="plain" text="You will quit at {formatTime(quittingTime)}." />
+          </wrapLayout>
+
+          <wrapLayout>
+            <listView items={colors} on:itemTap={onTapColor}>
+              <Template let:item={color}>
+                <label class="list" text="One of the colors is {color}." />
+              </Template>
+            </listView>
+          </wrapLayout>
+
+          <wrapLayout>
+            <label text="Favorite Color" />
+            <!--TODO: See https://github.com/halfnelson/svelte-native/issues/129 -->
+            <!--listPicker items={colors} bind:selectedIndex={favoriteColorIndex} 
+              on:selectedIndexChange={onFavoriteColor} /-->
+            <listPicker items={colors} on:selectedIndexChange={onFavoriteColor} />
+            <label class="plain" text="You selected {favoriteColor}." />
+          </wrapLayout>
+          <button on:tap={pickColor}>Pick a Color</button>
+
+          <!-- Using gridLayout to position activityIndicator over searchBar. -->
+          <gridLayout rows="*">
+            <searchBar
+              hint="Enter part of a color name."
+              bind:text={query}
+              on:submit={onSearchSubmit}
+              row="0"
+            />
+            <!-- The activityIndication height and width attributes
+                control the allocated space.
+                But the size of the spinner cannot be changed,
+                only the color. -->
+            <activityIndicator busy={busy} row="0"/>
           </gridLayout>
-        </tabContentItem>
-        <tabContentItem>
-          <gridLayout>
-            <label text="Account Page" class="h2 text-center" />
-          </gridLayout>
-        </tabContentItem>
-        <tabContentItem>
-          <gridLayout>
-            <label text="Search Page" class="h2 text-center" />
-          </gridLayout>
-        </tabContentItem>
 
-      </tabs-->
-    </stackLayout>
-  </scrollView>
+          <wrapLayout>
+            <label text="Stars" />
+            <!-- The slider position doesn't change when
+                JavaScript code changes the value of stars.
+                See https://github.com/halfnelson/svelte-native/issues/128. -->
+            <slider
+              minValue={1}
+              maxValue={5}
+              value={stars}
+              on:valueChange={starChange}
+            />
+            <label class="plain" text="You rated it {stars} stars" />
+          </wrapLayout>
+
+        </stackLayout>
+      </scrollView>
+    </tabContentItem>
+
+    <!-- Other content -->
+    <tabContentItem>
+      <stackLayout
+        backgroundColor={backgroundColor}
+        class="p-20"
+      >
+        <wrapLayout>
+          {#if authenticated}
+            <button on:tap={() => authenticated = false}>Logout</button>
+          {:else}
+            <button on:tap={promptForLogin}>Login ...</button>
+          {/if}
+        </wrapLayout>
+      </stackLayout>
+    </tabContentItem>
+  </tabs>
 </page>
 
 <style>
