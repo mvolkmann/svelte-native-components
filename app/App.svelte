@@ -213,40 +213,48 @@
 
     <!-- Display content -->
     <tabContentItem>
-      <stackLayout
-        backgroundColor={backgroundColor}
-        class="p-20"
-      >
-        <image src="~/svelte-native-logos.png" stretch="aspectFit" />
+      <scrollView>
+        <stackLayout
+          backgroundColor={backgroundColor}
+          class="p-20"
+        >
+          <label class="title" text="label" />
+          <label class="plain" text="some text" />
 
-        <label class="panagram" textWrap="true">
-          <formattedString>
-            <span class="fox">The quick brown fox</span>
-            <span text=" jumps over " />
-            <span class="dog">the lazy dog</span>
-            <span text="." />
-          </formattedString>
-        </label>
+          <label class="title" text="label with formattedString" />
+          <label class="panagram" textWrap="true">
+            <formattedString>
+              <span class="fox">The quick brown fox</span>
+              <span text=" jumps over " />
+              <span class="dog">the lazy dog</span>
+              <span text="." />
+            </formattedString>
+          </label>
 
-        <!-- The NativeScript docs say
-            "The HtmlView component has limited styling capabilities.
-            For more complex scenarios use the WebView component." -->
-        <!--htmlView html={myHtml} /-->
+          <label class="title" text="image" />
+          <image src="~/svelte-native-logos.png" stretch="aspectFit" />
 
-        <!-- webView components may need to be given a height in CSS.
-            See https://github.com/halfnelson/svelte-native/issues/132. -->
-        <webView src={myHtml} />
+          <!-- The NativeScript docs say
+              "The HtmlView component has limited styling capabilities.
+              For more complex scenarios use the WebView component." -->
+          <!--htmlView html={myHtml} /-->
 
-        <!--TODO: It appears that you cannot pass a string of HTML
-            as the value of the src attribute. -->
-        <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
+          <!-- webView components may need to be given a height in CSS.
+              See https://github.com/halfnelson/svelte-native/issues/132. -->
+          <webView src={myHtml} />
 
-        <!--TODO: Try to get this to work. -->
-        <!--webView src="~/demo.html" /-->
+          <!--TODO: It appears that you cannot pass a string of HTML
+              as the value of the src attribute. -->
+          <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
 
-        <button on:tap={startProgress}>Start Progress</button>
-        <progress class="progress" maxValue={100} value="{progressPercent}" />
-      </stackLayout>
+          <!--TODO: Try to get this to work. -->
+          <!--webView src="~/demo.html" /-->
+
+          <label class="title" text="progress" />
+          <button on:tap={startProgress}>Start Progress</button>
+          <progress class="progress" maxValue={100} value="{progressPercent}" />
+        </stackLayout>
+      </scrollView>
     </tabContentItem>
 
     <!-- Input content -->
@@ -256,19 +264,24 @@
           backgroundColor={backgroundColor}
           class="p-20"
         >
+          <!-- like HTML <input type="text"> -->
+          <label class="title" text="textField" />
           <wrapLayout>
             <label text="First Name" />
-            <textField class="first-name" bind:text={firstName} />
+            <textField class="first-name" hint="first name" bind:text={firstName} />
             <label class="plain" text="Your first name is {firstName}." />
           </wrapLayout>
-          <button on:tap={getFirstName}>Prompt for First Name</button>
 
+          <!-- like HTML <textarea> -->
+          <label class="title" text="textView" />
           <wrapLayout>
             <label text="What would you say you do here?" />
-            <textView class="reason" bind:text={reason} />
+            <textView class="reason" hint="reason for being" bind:text={reason} />
             <label class="plain" text="Your reason for being is {reason}." textWrap="true" />
           </wrapLayout>
 
+          <!-- like HTML <input type="checkbox"> -->
+          <label class="title" text="switch" />
           <wrapLayout>
             <label text="Like Running?" />
             <switch bind:checked={likeRunning} />
@@ -278,7 +291,12 @@
             />
           </wrapLayout>
 
-          <segmentedBar selectedBackgroundColor="yellow">
+          <!-- like HTML <input type="radio"> -->
+          <label class="title" text="segmentedBar" />
+          <segmentedBar
+            bind:selectedIndex={temperatureIndex}
+            selectedBackgroundColor="yellow"
+          >
             <segmentedBarItem title="Cold" />
             <segmentedBarItem title="Warm" />
             <segmentedBarItem title="Hot" />
@@ -295,52 +313,60 @@
               <segmentedBarItem title={temp} />
             {/each}
           </segmentedBar>
+          <label
+            class="plain"
+            text="You are feeling {temperatures[temperatureIndex]}."
+          />
 
+          <!-- like HTML <input type="date"> -->
+          <label class="title" text="datePicker" />
           <wrapLayout>
             <label text="Birthday" />
             <datePicker bind:date={birthday} />
             <label class="plain" text="You selected {formatDate(birthday)}." />
           </wrapLayout>
 
+          <!-- like HTML <input type="time"> -->
+          <label class="title" text="timePicker" />
           <wrapLayout>
             <label text="Quitting Time" />
             <timePicker bind:time={quittingTime} />
             <label class="plain" text="You will quit at {formatTime(quittingTime)}." />
           </wrapLayout>
 
+          <!-- like HTML <ul>, <ol>, or <select> -->
+          <label class="title" text="listView" />
           <wrapLayout>
             <listView items={colors} on:itemTap={onTapColor}>
               <Template let:item={color}>
-                <label class="list" text="One of the colors is {color}." />
+                <!--TODO: Why doesn't class:selected get reevaluated when favoriteColor changes? -->
+                <label
+                  class="list"
+                  class:selected={color === favoriteColor}
+                  text="One of the colors is {color}."
+                />
               </Template>
             </listView>
           </wrapLayout>
+          <label class="plain" text="You selected {favoriteColor}." />
 
+          <!-- like HTML <select> -->
+          <label class="title" text="listPicker" />
           <wrapLayout>
             <label text="Favorite Color" />
             <!--TODO: See https://github.com/halfnelson/svelte-native/issues/129 -->
             <!--listPicker items={colors} bind:selectedIndex={favoriteColorIndex} 
               on:selectedIndexChange={onFavoriteColor} /-->
-            <listPicker items={colors} on:selectedIndexChange={onFavoriteColor} />
+            <listPicker
+              items={colors}
+              selectedIndex={favoriteColorIndex}
+              on:selectedIndexChange={onFavoriteColor}
+            />
             <label class="plain" text="You selected {favoriteColor}." />
           </wrapLayout>
-          <button on:tap={pickColor}>Pick a Color</button>
 
-          <!-- Using gridLayout to position activityIndicator over searchBar. -->
-          <gridLayout rows="*">
-            <searchBar
-              hint="Enter part of a color name."
-              bind:text={query}
-              on:submit={onSearchSubmit}
-              row="0"
-            />
-            <!-- The activityIndication height and width attributes
-                control the allocated space.
-                But the size of the spinner cannot be changed,
-                only the color. -->
-            <activityIndicator busy={busy} row="0"/>
-          </gridLayout>
-
+          <!-- like HTML <input type="range"> -->
+          <label class="title" text="slider" />
           <wrapLayout>
             <label text="Stars" />
             <!-- The slider position doesn't change when
@@ -361,18 +387,45 @@
 
     <!-- Other content -->
     <tabContentItem>
-      <stackLayout
-        backgroundColor={backgroundColor}
-        class="p-20"
-      >
-        <wrapLayout>
-          {#if authenticated}
-            <button on:tap={() => authenticated = false}>Logout</button>
-          {:else}
-            <button on:tap={promptForLogin}>Login ...</button>
-          {/if}
-        </wrapLayout>
-      </stackLayout>
+      <scrollView>
+        <stackLayout
+          backgroundColor={backgroundColor}
+          class="p-20"
+        >
+          <label class="title" text="login" />
+          <wrapLayout>
+            {#if authenticated}
+              <button on:tap={() => authenticated = false}>Logout</button>
+            {:else}
+              <button on:tap={promptForLogin}>Login ...</button>
+            {/if}
+          </wrapLayout>
+
+          <label class="title" text="prompt" />
+          <button on:tap={getFirstName}>Prompt for First Name</button>
+          <label class="plain" text="Your first name is {firstName}." />
+
+          <label class="title" text="action" />
+          <button on:tap={pickColor}>Pick a Color</button>
+          <label class="plain" text="You selected {favoriteColor}." />
+
+          <label class="title" text="searchBar" />
+          <!-- Using gridLayout to position activityIndicator over searchBar. -->
+          <gridLayout rows="*">
+            <searchBar
+              hint="Enter part of a color name."
+              bind:text={query}
+              on:submit={onSearchSubmit}
+              row="0"
+            />
+            <!-- The activityIndication height and width attributes
+                control the allocated space.
+                But the size of the spinner cannot be changed,
+                only the color. -->
+            <activityIndicator busy={busy} row="0"/>
+          </gridLayout>
+        </stackLayout>
+      </scrollView>
     </tabContentItem>
   </tabs>
 </page>
@@ -454,6 +507,23 @@
 
   segmentedBar {
     color: red;
+    margin-bottom: 10;
+    margin-top: 10;
+  }
+
+  .selected {
+    background-color: lightgreen;
+  }
+
+  .title {
+    border-top-color: purple;
+    border-top-width: 5px;
+    color: purple;
+    font-size: 20;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 10;
+    padding-top: 10;
   }
 
   webView {
