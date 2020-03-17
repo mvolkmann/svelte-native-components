@@ -1,18 +1,17 @@
 <script>
-	import {Template} from 'svelte-native/components'
+  import {Template} from 'svelte-native/components'
   import {login} from 'tns-core-modules/ui/dialogs'
 
   const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
-  /*
+
   const myHtml = `
-    <h1 style="color: red; font-size: 12px">
+    <div>
       <span style="color: red">The quick brown fox</span>
       <span>jumps over</span>
       <span style="color: blue">the lazy dog</span>
-    </h1>
+    </div>
   `;
-  */
-  const myHtml = '<h1 style="color: red">Test</h1>';
+  //const myHtml = '<h1 style="color: red">Test</h1>';
   const temperatures = ['Cold', 'Warm', 'Hot'];
 
   let authenticated = false;
@@ -34,7 +33,7 @@
   quittingTime.setMinutes(0);
   quittingTime.setSeconds(0);
 
-  $: favoriteColor = colors[favoriteColorIndex];
+  //$: favoriteColor = colors[favoriteColorIndex];
 
   async function checkColor() {
     if (favoriteColor === 'yellow') {
@@ -88,14 +87,11 @@
       cancelButtonText: 'I will not share that'
     });
     if (res.result) firstName = res.text;
-	}
+  }
 
   function onFavoriteColor(event) {
-    //TODO: Why is event.index undefined?
-    console.log('App.svelte onFavoriteColor: event.oldIndex =', event.oldIndex);
-    console.log('App.svelte onFavoriteColor: event.newIndex =', event.newIndex);
-    //favoriteColor = colors[event.newIndex];
-    console.log('App.svelte onFavoriteColor: favoriteColor =', favoriteColor);
+    const index = event.value; // weird that this is an index
+    favoriteColor = colors[index];
   }
 
   function onSearchSubmit() {
@@ -132,7 +128,7 @@
     const NONE = 'No Thanks';
     const choice = await action('Pick a color', NONE, colors);
     if (choice !== NONE) favoriteColor = choice;
-	}
+  }
 
   async function promptForLogin() {
     const res = await login({
@@ -143,12 +139,13 @@
       okButtonText: 'OK',
       cancelButtonText: 'Cancel',
     });
-    */
+    /*
     const res = await login(
       'This will unlock more features.',
       'username',
       'password'
     );
+    */
     if (res.result) {
       // Authenticate the user here.
       authenticated = res.userName === 'foo' && res.password === 'bar';
@@ -162,10 +159,10 @@
     }
   }
 
-  function starChange() {
-    console.log('App.svelte starChange: before stars =', stars);
-    stars = Math.round(stars);
-    console.log('App.svelte starChange: after stars =', stars);
+  function starChange(event) {
+    console.log('App.svelte starChange: event.value =', event.value);
+    stars = Math.round(event.value);
+    console.log('App.svelte starChange: stars =', stars);
   }
 
   function startProgress() {
@@ -179,14 +176,14 @@
 
 <page>
   <!-- TODO: Still need to demo TabStrip, TabStripItem, TabContentItem,
-       BottomNavigation, Tabs, and TabView.
+       BottomNavigation, and Tabs.
        Modify this to display different categories of components
        on different pages.
   -->
 
   <actionBar title="Svelte Native Demo">
     <!-- button with upload icon -->
-  	<actionItem on:tap="{onTapShare}"
+    <actionItem on:tap="{onTapShare}"
       ios.systemIcon="9" ios.position="left"
       android.systemIcon="ic_menu_share" android.position="actionBar" />
     <!-- button with trashcan icon -->
@@ -197,6 +194,14 @@
 
   <scrollView backgroundColor={authenticated ? 'lightgreen' : 'pink'}>
     <stackLayout class="p-20">
+      <wrapLayout>
+        {#if authenticated}
+          <button on:tap={() => authenticated = false}>Logout</button>
+        {:else}
+          <button on:tap={promptForLogin}>Login ...</button>
+        {/if}
+      </wrapLayout>
+
       <!-- Using gridLayout to position activityIndicator over searchBar. -->
       <gridLayout rows="*">
         <searchBar
@@ -212,45 +217,6 @@
         <activityIndicator busy={busy} row="0"/>
       </gridLayout>
 
-      <tabs bind:selectedIndex={selectedTab}>
-
-        <!-- The bottom tab UI is created via TabStrip (the container)
-             and TabStripItem (for each tab). -->
-        <tabStrip>
-          <tabStripItem>
-            <label text="Home" />
-            <image src="font://&#xf015;" class="fas t-36" />
-          </tabStripItem>
-          <tabStripItem class="special">
-            <label text="Account" />
-            <image src="font://&#xf007;" class="fas t-36" />
-          </tabStripItem>
-          <tabStripItem class="special">
-            <label text="Search" />
-            <image src="font://&#xf00e;" class="fas t-36" />
-          </tabStripItem>
-        </tabStrip>
-
-        <!-- The number of TabContentItem components should
-             correspond to the number of TabStripItem components -->
-        <tabContentItem>
-          <gridLayout>
-            <label text="Home Page" class="h2 text-center" />
-          </gridLayout>
-        </tabContentItem>
-        <tabContentItem>
-          <gridLayout>
-            <label text="Account Page" class="h2 text-center" />
-          </gridLayout>
-        </tabContentItem>
-        <tabContentItem>
-          <gridLayout>
-            <label text="Search Page" class="h2 text-center" />
-          </gridLayout>
-        </tabContentItem>
-
-      </tabs>
-
       <image src="~/svelte-native-logos.png" stretch="fill" />
 
       <segmentedBar selectedBackgroundColor="yellow">
@@ -259,20 +225,18 @@
         <segmentedBarItem title="Hot" />
       </segmentedBar>
 
-      <!-- This crashes the app.
-           See https://github.com/halfnelson/svelte-native/issues/134. -->
-      <!--segmentedBar
-        items={temperatures}
+      <!-- The API docs show passing an array of items
+           using the "items" prop, but that does not work.
+           The children must be segmentedBarItem components. -->
+      <segmentedBar
         bind:selectedIndex={temperatureIndex}
-      /-->
+        selectedBackgroundColor="yellow"
+      >
+        {#each temperatures as temp}
+          <segmentedBarItem title={temp} />
+        {/each}
+      </segmentedBar>
 
-      <wrapLayout>
-        {#if authenticated}
-          <button on:tap={() => authenticated = false}>Logout</button>
-        {:else}
-          <button on:tap={promptForLogin}>Login ...</button>
-        {/if}
-      </wrapLayout>
       <label class="panagram" textWrap="true">
         <formattedString>
           <span class="fox">The quick brown fox</span>
@@ -281,14 +245,22 @@
           <span text="." />
         </formattedString>
       </label>
-      <!-- Any style attributes are ignored.
-           See https://github.com/halfnelson/svelte-native/issues/133. -->
-      <htmlView html={myHtml} />
-      <!-- webView components do not render anything.
+
+      <!-- The NativeScript docs say
+           "The HtmlView component has limited styling capabilities.
+           For more complex scenarios use the WebView component." -->
+      <!--htmlView html={myHtml} /-->
+
+      <!-- webView components may need to be given a height in CSS.
            See https://github.com/halfnelson/svelte-native/issues/132. -->
-      <!--webView src={myHtml} />
-      <webView src="<div><h1>I am a webView.</h1></div>" />
-      <webView src="~/demo.html" /-->
+      <webView src={myHtml} />
+
+      <!--TODO: It appears that you cannot pass a string of HTML
+          as the value of the src attribute. -->
+      <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
+
+      <!--TODO: Try to get this to work. -->
+      <!--webView src="~/demo.html" /-->
 
       <button on:tap={startProgress}>Start Progress</button>
       <progress class="progress" maxValue={100} value="{progressPercent}" />
@@ -308,17 +280,21 @@
       <wrapLayout>
         <label text="Favorite Color" />
         <!--TODO: See https://github.com/halfnelson/svelte-native/issues/129 -->
-        <listPicker items={colors} bind:selectedIndex={favoriteColorIndex} 
-          on:selectedIndexChange={onFavoriteColor} />
+        <!--listPicker items={colors} bind:selectedIndex={favoriteColorIndex} 
+          on:selectedIndexChange={onFavoriteColor} /-->
+        <listPicker items={colors} on:selectedIndexChange={onFavoriteColor} />
         <label class="plain" text="You selected {favoriteColor}." />
       </wrapLayout>
       <button on:tap={pickColor}>Pick a Color</button>
       <wrapLayout>
         <label text="Stars" />
+        <!-- The slider position doesn't change when
+             JavaScript code changes the value of stars.
+             See https://github.com/halfnelson/svelte-native/issues/128. -->
         <slider
           minValue={1}
           maxValue={5}
-          bind:value={stars}
+          value={stars}
           on:valueChange={starChange}
         />
         <label class="plain" text="You rated it {stars} stars" />
@@ -347,6 +323,45 @@
         <timePicker bind:time={quittingTime} />
         <label class="plain" text="You will quit at {formatTime(quittingTime)}." />
       </wrapLayout>
+
+      <!--tabs bind:selectedIndex={selectedTab}>
+
+        !-- The bottom tab UI is created via TabStrip (the container)
+             and TabStripItem (for each tab). --
+        <tabStrip>
+          <tabStripItem>
+            <label text="Home" />
+            <image src="font://&#xf015;" class="fas t-36" />
+          </tabStripItem>
+          <tabStripItem class="special">
+            <label text="Account" />
+            <image src="font://&#xf007;" class="fas t-36" />
+          </tabStripItem>
+          <tabStripItem class="special">
+            <label text="Search" />
+            <image src="font://&#xf00e;" class="fas t-36" />
+          </tabStripItem>
+        </tabStrip>
+
+        !-- The number of TabContentItem components should
+             correspond to the number of TabStripItem components --
+        <tabContentItem>
+          <gridLayout>
+            <label text="Home Page" class="h2 text-center" />
+          </gridLayout>
+        </tabContentItem>
+        <tabContentItem>
+          <gridLayout>
+            <label text="Account Page" class="h2 text-center" />
+          </gridLayout>
+        </tabContentItem>
+        <tabContentItem>
+          <gridLayout>
+            <label text="Search Page" class="h2 text-center" />
+          </gridLayout>
+        </tabContentItem>
+
+      </tabs-->
     </stackLayout>
   </scrollView>
 </page>
@@ -432,7 +447,7 @@
 
   webView {
     border-color: red;
-    border-width: 3;
-    height: 100;
+    border-width: 1;
+    /*height: 50; /*TODO: Is this required? */
   }
 </style>
