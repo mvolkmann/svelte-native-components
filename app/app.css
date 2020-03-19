@@ -13,3 +13,35 @@ The imported CSS rules must precede all other types of rules.
 @import '~nativescript-theme-core/css/core.css';
 @import './font-awesome.css';
 
+button {
+  background-color: lightgray;
+  border-color: darkgray;
+  border-width: 3;
+  border-radius: 10;
+  font-weight: bold;
+  horizontal-align: center; /* to size according to content */
+  padding: 10;
+}
+
+label {
+  color: blue;
+  font-size: 18;
+  font-weight: bold;
+}
+
+.plain {
+  color: black;
+  font-size: 12;
+  font-weight: normal;
+}
+
+.title {
+  border-top-color: purple;
+  border-top-width: 5px;
+  color: purple;
+  font-size: 20;
+  font-weight: bold;
+  font-style: italic;
+  margin-top: 10;
+  padding-top: 10;
+}
