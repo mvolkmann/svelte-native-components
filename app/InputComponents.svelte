@@ -14,11 +14,11 @@
 
   let birthday = new Date(1961, 3, 16);
   let likeRunning = false;
-  let quittingTime = new Date();
   let reason = '';
   let stars = 3;
   let temperatureIndex = 1;
 
+  let quittingTime = new Date();
   quittingTime.setHours(17);
   quittingTime.setMinutes(0);
   quittingTime.setSeconds(0);
@@ -46,7 +46,7 @@
   }
 
   function onFavoriteColor(event) {
-    $favoriteColorIndex = event.value; // weird that this is an index
+    $favoriteColorIndex = event.value; // odd that this is an index
   }
 
   function onTapColor(event) {
@@ -102,7 +102,6 @@
       <segmentedBarItem title="Warm" />
       <segmentedBarItem title="Hot" />
     </segmentedBar>
-
     <!-- The API docs show passing an array of items
         using the "items" prop, but that does not work.
         The children must be segmentedBarItem components. -->
@@ -155,9 +154,6 @@
     <label class="title" text="listPicker" />
     <wrapLayout>
       <label text="Favorite Color" />
-      <!--TODO: See https://github.com/halfnelson/svelte-native/issues/129 -->
-      <!--listPicker items={colors} bind:selectedIndex={$favoriteColorIndex} 
-        on:selectedIndexChange={onFavoriteColor} /-->
       <listPicker
         items={colors}
         selectedIndex={$favoriteColorIndex}
@@ -181,7 +177,6 @@
       />
       <label class="plain" text="You rated it {stars} stars" />
     </wrapLayout>
-
   </stackLayout>
 </scrollView>
 

@@ -8,7 +8,6 @@
       <span style="color: blue">the lazy dog</span>
     </div>
   `;
-  //const myHtml = '<h1 style="color: red">Test</h1>';
 
   let progressPercent = 0;
 
@@ -40,22 +39,16 @@
     </label>
 
     <label class="title" text="image" />
-    <image src="~/svelte-native-logos.png" stretch="aspectFit" />
+    <wrapLayout class="image-frame">
+      <image src="~/svelte-native-logos.png" stretch="aspectFit" />
+    </wrapLayout>
 
-    <!-- The NativeScript docs say
-        "The HtmlView component has limited styling capabilities.
-        For more complex scenarios use the WebView component." -->
-    <!--htmlView html={myHtml} /-->
-
-    <!-- webView components may need to be given a height in CSS.
-        See https://github.com/halfnelson/svelte-native/issues/132. -->
+    <label class="title" text="webView" />
+    <webView src="<h1>I am a webView.</h1>" />
     <webView src={myHtml} />
-
-    <!--TODO: It appears that you cannot pass a string of HTML
-        as the value of the src attribute. -->
-    <!--webView src="<div><h1>I am a webView.</h1></div>" /-->
-
-    <!--TODO: Try to get this to work. -->
+    <webView style="height: 300" src="https://svelte-native.technology/" />
+    <!-- This does not work!
+         See https://github.com/halfnelson/svelte-native/issues/138. -->
     <!--webView src="~/demo.html" /-->
 
     <label class="title" text="progress" />
@@ -75,9 +68,9 @@
     font-weight: bold;
   }
 
-  image {
-    border-color: green;
-    border-width: 1;
+  .image-frame {
+    background-color: white;
+    padding: 10;
   }
 
   .panagram {
@@ -98,6 +91,6 @@
   webView {
     border-color: red;
     border-width: 1;
-    /*height: 50; /*TODO: Is this required? */
+    height: 50;
   }
 </style>
