@@ -16,7 +16,6 @@
   $: $backgroundColor = $authenticated ? 'lightgreen' : 'pink';
 
   async function getFirstName() {
-    const NONE = 'No Thanks';
     const res = await prompt({
       title: 'First Name',
       message: 'Please tell me your first name.',
